@@ -28,5 +28,9 @@
   },
   "dependencies": {
     "@types/webpack": "^5.28.0"
-  }
+  },
+  "peerDependencies": {
+    "@tarojs/mini-runner": "3.4.3"
+  },
+  "gitHead": "b902c81fbdc78328b028e556cd6c0c55c7e34eab"
 }
