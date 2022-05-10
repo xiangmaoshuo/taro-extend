@@ -59,12 +59,12 @@ module.exports = function getRollupConfig() {
   return [
     // CommonJS
     {
-      file: resolve(cwd, 'lib/index.js'),
+      dir: 'lib',
       format: 'cjs',
     },
     // ES
     {
-      file: resolve(cwd, 'es/index.js'),
+      dir: 'es',
       format: 'es',
     },
   ].map((module) => {
@@ -81,8 +81,8 @@ module.exports = function getRollupConfig() {
         break;
     }
 
-    return {
-      input: 'src/index.ts',
+    return (entry) => ({
+      input: entry,
       output: {
         ...module,
         indent: false,
@@ -128,6 +128,6 @@ module.exports = function getRollupConfig() {
           babelHelpers: 'runtime',
         }),
       ].filter(Boolean),
-    };
+    });
   });
 };

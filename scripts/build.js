@@ -1,6 +1,6 @@
 const { resolve } = require('path');
 const chalk = require('chalk');
-const { readdirSync, lstatSync } = require('fs');
+const { readdirSync, readFileSync, lstatSync } = require('fs');
 const { rollup, watch } = require('rollup');
 const randomColor = require('randomcolor');
 const signale = require('signale');
@@ -19,32 +19,44 @@ function log(text, color) {
   console.log(chalk.hex(currentColor).visible(text));
 }
 
+function isFile(fileName) {
+  return lstatSync(fileName).isFile();
+}
+
+function getFileContentSync(fileName) {
+  if (!isFile(fileName)) return null;
+  return readFileSync(fileName, { encoding: 'utf-8' });
+}
+
 function getEntryFileName(packagePath) {
   const src = resolve(packagePath, 'src');
+  const pkg = getFileContentSync(resolve(packagePath, 'package.json'));
+  if (pkg) {
+    const { entries } = JSON.parse(pkg);
+    if (entries) {
+      return entries.map((fileName) => resolve(src, fileName));
+    }
+  }
   const entryFile = readdirSync(src).filter(
     (fileName) =>
-      /^index\.(js|ts|tsx)$/.test(fileName) &&
-      lstatSync(resolve(src, fileName)).isFile(),
+      /^index\.(js|ts|tsx)$/.test(fileName) && isFile(resolve(src, fileName)),
   )[0];
 
   return `${src}/${entryFile}`;
 }
 
-async function rollupBuild({ color, package, rollupConfigs, entryFileName }) {
+async function rollupBuild({ color, package, rollupConfigs }) {
   log(`start build package ${package}...`, color);
   // run rollup build
   for (const rollupConfig of rollupConfigs) {
     const { output, ...inputOptions } = rollupConfig;
-    const bundle = await rollup({
-      ...inputOptions,
-      input: entryFileName,
-    });
+    const bundle = await rollup(inputOptions);
     await bundle.write(output);
   }
   log(`package ${package} build success`, color);
 }
 
-async function rollupWatch({ color, package, rollupConfigs, entryFileName }) {
+async function rollupWatch({ color, package, rollupConfigs }) {
   return new Promise((resolve, reject) => {
     let watchOptions = Array.isArray(rollupConfigs)
       ? rollupConfigs
@@ -53,7 +65,6 @@ async function rollupWatch({ color, package, rollupConfigs, entryFileName }) {
     watchOptions = watchOptions
       .map((watchOption) => ({
         ...watchOption,
-        input: entryFileName,
         watch: {
           include: ['src/**'],
           exclude: ['**/node_modules/**', '*.md'],
@@ -88,8 +99,7 @@ async function build({ root, package }) {
   return rollupStart({
     color,
     package,
-    rollupConfigs,
-    entryFileName,
+    rollupConfigs: rollupConfigs.map((fn) => fn(entryFileName)),
   });
 }
 
@@ -103,7 +113,6 @@ async function lernaBuild() {
   } catch (e) {
     signale.error(e);
   }
-
 }
 
 lernaBuild();

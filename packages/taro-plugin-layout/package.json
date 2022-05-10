@@ -7,6 +7,10 @@
   "main": "./lib/index.js",
   "module": "./es/index.js",
   "types": "./lib/index.d.ts",
+  "entries": [
+    "index.ts",
+    "loader.ts"
+  ],
   "directories": {
     "lib": "lib",
     "test": "__tests__"
