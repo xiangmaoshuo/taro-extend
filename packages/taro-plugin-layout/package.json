@@ -1,6 +1,6 @@
 {
   "name": "taro-plugin-layout",
-  "version": "1.2.3",
+  "version": "1.0.0",
   "description": "The taro project can be configured using layout",
   "author": "xiangmaoshuo",
   "license": "ISC",

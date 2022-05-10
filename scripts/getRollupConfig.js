@@ -81,8 +81,6 @@ module.exports = function getRollupConfig() {
         break;
     }
 
-    const libraryDirectory = format === 'cjs' ? 'lib' : 'es';
-
     return {
       input: 'src/index.ts',
       output: {
